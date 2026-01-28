@@ -2,41 +2,48 @@ import React, { useCallback, useMemo, forwardRef } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
-  Image,
   Dimensions,
 } from 'react-native';
 import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from '@gorhom/bottom-sheet';
 import { Button } from '../../components';
 import { useAppDispatch } from '../../redux/hooks';
 import { setWelcomeSheetSeen } from '../../redux/slices/onboardingSlice';
-import onboardingService from '../../services/onboardingService';
+import { onboardSheetStyles as styles } from '../../utils';
 
 const { width } = Dimensions.get('window');
 
 export interface OnboardSheetProps {
   userId: string;
   onClose: () => void;
+  onShowFeedback: () => void;
 }
 
 export const OnboardSheet = forwardRef<BottomSheet, OnboardSheetProps>(
-  ({ userId, onClose }, ref) => {
+  ({ userId, onClose, onShowFeedback }, ref) => {
     const dispatch = useAppDispatch();
-    const snapPoints = useMemo(() => ['65%'], []);
+    const snapPoints = useMemo(() => [399], []); // Fixed height per Figma
 
-    const handleClose = useCallback(async () => {
-      try {
-        // Mark sheet as seen in Redux
-        dispatch(setWelcomeSheetSeen());
-        
-        // Mark sheet as seen in backend (non-blocking)
-        onboardingService.markSheetSeen(userId, 'welcome').catch(console.error);
-        
-        onClose();
-      } catch (error) {
-        console.error('Error closing welcome sheet:', error);
-      }
-    }, [dispatch, userId, onClose]);
+    const handleFeedback = useCallback(
+      (isLovingIt: boolean) => {
+        try {
+          if (isLovingIt) {
+            // User loves it - just close and mark as seen
+            console.log('User loves Rizon');
+            dispatch(setWelcomeSheetSeen());
+            onClose();
+          } else {
+            // User clicked "Not yet" - show feedback sheet
+            console.log('User not yet loving Rizon - showing feedback');
+            dispatch(setWelcomeSheetSeen());
+            onClose();
+            onShowFeedback();
+          }
+        } catch (error) {
+          console.error('Error handling feedback:', error);
+        }
+      },
+      [dispatch, onClose, onShowFeedback]
+    );
 
     const renderBackdrop = useCallback(
       (props: any) => (
@@ -58,29 +65,39 @@ export const OnboardSheet = forwardRef<BottomSheet, OnboardSheetProps>(
         enablePanDownToClose={false}
         backdropComponent={renderBackdrop}
         handleIndicatorStyle={styles.handleIndicator}
+        style={styles.bottomSheet}
       >
         <BottomSheetView style={styles.contentContainer}>
-          <View style={styles.imageContainer}>
-            {/* Replace with your actual welcome image */}
-            <View style={styles.placeholderImage}>
-              <Text style={styles.placeholderText}>🎉</Text>
+          {/* Logo Box */}
+          <View style={styles.logoContainer}>
+            <View style={styles.logoBox}>
+              <Text style={styles.logoText}>RIZON</Text>
             </View>
           </View>
 
+          {/* Text Section */}
           <View style={styles.textContainer}>
-            <Text style={styles.title}>Welcome to Our App!</Text>
+            <Text style={styles.title}>Enjoying Rizon so far?</Text>
             <Text style={styles.description}>
-              We're excited to have you here. Let's get started with a quick
-              tour to help you make the most of your experience.
+              Your feedback helps us build a better money experience.
             </Text>
           </View>
 
-          <View style={styles.buttonContainer}>
+          {/* Buttons */}
+          <View style={styles.buttonsRow}>
             <Button
-              title="Get Started"
-              onPress={handleClose}
+              title="Not yet"
+              variant="secondary"
+              onPress={() => handleFeedback(false)}
+              style={styles.outlineButton}
+              textStyle={styles.outlineText}
+            />
+            <Button
+              title="Yes, loving it"
               variant="primary"
-              style={styles.button}
+              onPress={() => handleFeedback(true)}
+              style={styles.filledButton}
+              textStyle={styles.filledText}
             />
           </View>
         </BottomSheetView>
@@ -90,53 +107,3 @@ export const OnboardSheet = forwardRef<BottomSheet, OnboardSheetProps>(
 );
 
 OnboardSheet.displayName = 'OnboardSheet';
-
-const styles = StyleSheet.create({
-  contentContainer: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingBottom: 32,
-  },
-  handleIndicator: {
-    backgroundColor: '#E5E5EA',
-    width: 40,
-  },
-  imageContainer: {
-    alignItems: 'center',
-    marginTop: 16,
-    marginBottom: 24,
-  },
-  placeholderImage: {
-    width: width * 0.5,
-    height: width * 0.5,
-    backgroundColor: '#F2F2F7',
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  placeholderText: {
-    fontSize: 80,
-  },
-  textContainer: {
-    marginBottom: 32,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#1C1C1E',
-    textAlign: 'center',
-    marginBottom: 12,
-  },
-  description: {
-    fontSize: 16,
-    color: '#8E8E93',
-    textAlign: 'center',
-    lineHeight: 24,
-  },
-  buttonContainer: {
-    marginTop: 'auto',
-  },
-  button: {
-    width: '100%',
-  },
-});

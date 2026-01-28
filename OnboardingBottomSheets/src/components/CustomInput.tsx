@@ -47,7 +47,7 @@ export const CustomInput: React.FC<CustomInputProps> = ({
           onChangeText={onChangeText}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          placeholderTextColor="#8E8E93"
+          placeholderTextColor="#CFD1DC"
           maxLength={maxCharacters}
           {...props}
         />
@@ -68,7 +68,7 @@ export const CustomInput: React.FC<CustomInputProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 16,
+    marginBottom: 0,
   },
   label: {
     fontSize: 14,
@@ -78,10 +78,11 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     borderWidth: 1,
-    borderColor: '#E5E5EA',
-    borderRadius: 12,
-    backgroundColor: '#F2F2F7',
-    minHeight: 50,
+    borderColor: '#E1E3EB',
+    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    height: 64,
+    justifyContent: 'center',
   },
   inputContainerFocused: {
     borderColor: '#007AFF',
@@ -91,11 +92,14 @@ const styles = StyleSheet.create({
     borderColor: '#FF3B30',
   },
   input: {
-    flex: 1,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 0,
+    fontFamily: 'Helvetica',
+    fontWeight: '400',
     fontSize: 16,
+    lineHeight: 24,
     color: '#1C1C1E',
+    textAlign: 'left',
   },
   footer: {
     flexDirection: 'row',

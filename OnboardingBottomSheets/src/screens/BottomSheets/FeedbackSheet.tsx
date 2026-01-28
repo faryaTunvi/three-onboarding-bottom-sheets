@@ -2,8 +2,6 @@ import React, { useCallback, useMemo, forwardRef, useState, useRef } from 'react
 import {
   View,
   Text,
-  StyleSheet,
-  Dimensions,
   Platform,
   Alert,
 } from 'react-native';
@@ -11,9 +9,7 @@ import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from '@gorhom/botto
 import { Button, CustomInput } from '../../components';
 import { useAppDispatch } from '../../redux/hooks';
 import { setFeedbackSheetSeen } from '../../redux/slices/onboardingSlice';
-import onboardingService from '../../services/onboardingService';
-
-const { width } = Dimensions.get('window');
+import { feedbackSheetStyles as styles } from '../../utils/feedbackSheetStyles';
 
 export interface FeedbackSheetProps {
   userId: string;
@@ -32,7 +28,7 @@ export const FeedbackSheet = forwardRef<BottomSheet, FeedbackSheetProps>(
     
     const snapPoints = useMemo(() => ['70%'], []);
 
-    const handleSubmitFeedback = useCallback(async () => {
+    const handleSubmitFeedback = useCallback(() => {
       // Prevent race conditions - don't allow multiple simultaneous submissions
       if (isSubmittingRef.current) {
         console.log('Feedback submission already in progress');
@@ -50,26 +46,21 @@ export const FeedbackSheet = forwardRef<BottomSheet, FeedbackSheetProps>(
         setIsSubmitting(true);
         setError('');
 
-        // Submit feedback to backend - this must complete before closing
-        const response = await onboardingService.submitFeedback({
+        // Log feedback locally (UI-only mode)
+        console.log('Feedback submitted (UI-only):', {
           userId,
           feedback: feedback.trim(),
           timestamp: Date.now(),
-          platform: Platform.OS as 'ios' | 'android',
+          platform: Platform.OS,
         });
 
-        console.log('Feedback submitted successfully:', response);
-
-        // Only after successful submission, update Redux
+        // Update Redux state
         dispatch(setFeedbackSheetSeen());
-        
-        // Mark sheet as seen in backend (non-blocking)
-        onboardingService.markSheetSeen(userId, 'feedback').catch(console.error);
 
         // Show success message
-        Alert.alert('Thank You!', 'Your feedback has been submitted successfully.');
+        Alert.alert('Thank You!', 'Your feedback has been recorded.');
 
-        // Now we can safely close the sheet
+        // Close the sheet
         onClose();
       } catch (error) {
         console.error('Error submitting feedback:', error);
@@ -82,15 +73,14 @@ export const FeedbackSheet = forwardRef<BottomSheet, FeedbackSheetProps>(
       }
     }, [feedback, userId, dispatch, onClose]);
 
-    const handleSkip = useCallback(async () => {
+    const handleSkip = useCallback(() => {
       try {
         dispatch(setFeedbackSheetSeen());
-        onboardingService.markSheetSeen(userId, 'feedback').catch(console.error);
         onClose();
       } catch (error) {
         console.error('Error skipping feedback sheet:', error);
       }
-    }, [dispatch, userId, onClose]);
+    }, [dispatch, onClose]);
 
     const renderBackdrop = useCallback(
       (props: any) => (
@@ -114,23 +104,16 @@ export const FeedbackSheet = forwardRef<BottomSheet, FeedbackSheetProps>(
         handleIndicatorStyle={styles.handleIndicator}
       >
         <BottomSheetView style={styles.contentContainer}>
-          <View style={styles.imageContainer}>
-            <View style={styles.placeholderImage}>
-              <Text style={styles.placeholderText}>💬</Text>
-            </View>
-          </View>
-
           <View style={styles.textContainer}>
-            <Text style={styles.title}>We'd Love Your Feedback</Text>
+            <Text style={styles.title}>Help us improve Rizon</Text>
             <Text style={styles.description}>
-              Help us improve by sharing your thoughts and suggestions.
+              Tell us what didn't feel right, we read every message.
             </Text>
           </View>
 
           <View style={styles.inputContainer}>
             <CustomInput
-              label="Your Feedback"
-              placeholder="Tell us what you think..."
+              placeholder="Type your feedback here..."
               value={feedback}
               onChangeText={(text) => {
                 setFeedback(text);
@@ -139,7 +122,6 @@ export const FeedbackSheet = forwardRef<BottomSheet, FeedbackSheetProps>(
               multiline
               numberOfLines={4}
               maxCharacters={500}
-              showCharacterCount
               error={error}
               containerStyle={styles.input}
               style={styles.textArea}
@@ -149,19 +131,13 @@ export const FeedbackSheet = forwardRef<BottomSheet, FeedbackSheetProps>(
 
           <View style={styles.buttonContainer}>
             <Button
-              title="Send Feedback"
+              title="Send feedback"
               onPress={handleSubmitFeedback}
               variant="primary"
               loading={isSubmitting}
               disabled={isSubmitting || !feedback.trim()}
               style={styles.submitButton}
-            />
-            <Button
-              title="Skip for Now"
-              onPress={handleSkip}
-              variant="outline"
-              disabled={isSubmitting}
-              style={styles.skipButton}
+              textStyle={styles.submitButtonText}
             />
           </View>
         </BottomSheetView>
@@ -171,67 +147,3 @@ export const FeedbackSheet = forwardRef<BottomSheet, FeedbackSheetProps>(
 );
 
 FeedbackSheet.displayName = 'FeedbackSheet';
-
-const styles = StyleSheet.create({
-  contentContainer: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingBottom: 32,
-  },
-  handleIndicator: {
-    backgroundColor: '#E5E5EA',
-    width: 40,
-  },
-  imageContainer: {
-    alignItems: 'center',
-    marginTop: 16,
-    marginBottom: 20,
-  },
-  placeholderImage: {
-    width: width * 0.3,
-    height: width * 0.3,
-    backgroundColor: '#F2F2F7',
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  placeholderText: {
-    fontSize: 60,
-  },
-  textContainer: {
-    marginBottom: 24,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#1C1C1E',
-    textAlign: 'center',
-    marginBottom: 12,
-  },
-  description: {
-    fontSize: 16,
-    color: '#8E8E93',
-    textAlign: 'center',
-    lineHeight: 24,
-  },
-  inputContainer: {
-    marginBottom: 24,
-  },
-  input: {
-    marginBottom: 0,
-  },
-  textArea: {
-    minHeight: 100,
-    textAlignVertical: 'top',
-  },
-  buttonContainer: {
-    marginTop: 'auto',
-  },
-  submitButton: {
-    width: '100%',
-    marginBottom: 12,
-  },
-  skipButton: {
-    width: '100%',
-  },
-});

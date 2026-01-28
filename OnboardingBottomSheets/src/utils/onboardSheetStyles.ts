@@ -1,0 +1,96 @@
+import { StyleSheet } from 'react-native';
+
+export const onboardSheetStyles = StyleSheet.create({
+  bottomSheet: {
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+  },
+  contentContainer: {
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 24,
+    gap: 24,
+  },
+  handleIndicator: {
+    backgroundColor: '#E5E5EA',
+    width: 40,
+    alignSelf: 'center',
+  },
+  logoContainer: {
+    alignItems: 'center',
+  },
+  logoBox: {
+    backgroundColor: '#FFFF13',
+    width: 120,
+    height: 120,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logoText: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#000',
+  },
+  textContainer: {
+    alignItems: 'center',
+    paddingHorizontal: 16,
+  },
+  title: {
+    fontFamily: 'Helvetica',
+    fontWeight: '400',
+    fontSize: 24,
+    lineHeight: 32,
+    textAlign: 'center',
+    color: '#000000',
+    marginBottom: 8,
+  },
+  description: {
+    fontFamily: 'Helvetica',
+    fontWeight: '400',
+    fontSize: 16,
+    lineHeight: 24,
+    textAlign: 'center',
+    color: '#868AA5',
+  },
+  buttonsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  outlineButton: {
+    width: 167.5,
+    height: 48,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#E1E3EB',
+    borderRadius: 100,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+  },
+  outlineText: {
+    fontFamily: 'Helvetica',
+    fontWeight: '400',
+    fontSize: 16,
+    lineHeight: 24,
+    textAlign: 'center',
+    color: '#000000',
+  },
+  filledText: {
+    fontFamily: 'Helvetica',
+    fontWeight: '400',
+    fontSize: 16,
+    lineHeight: 24,
+    textAlign: 'center',
+    color: '#FFFFFF',
+  },
+  filledButton: {
+    flex: 1,
+    height: 48,
+    backgroundColor: '#000',
+    borderRadius: 100,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+  },
+});

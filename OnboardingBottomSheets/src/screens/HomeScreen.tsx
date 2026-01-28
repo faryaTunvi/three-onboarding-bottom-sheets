@@ -1,14 +1,8 @@
 import React, { useRef, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import BottomSheet from '@gorhom/bottom-sheet';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Button } from '../components';
 import {
   OnboardSheet,
   FeedbackSheet,
@@ -17,11 +11,9 @@ import {
 import { useAppSelector, useAppDispatch } from '../redux/hooks';
 import { useOnboardingFlow } from '../utils';
 import { resetOnboarding } from '../redux/slices/onboardingSlice';
-import { COLORS, SPACING } from '../utils/constants';
 import { RootState } from '../redux/store';
 
 export const HomeScreen: React.FC = () => {
-  const insets = useSafeAreaInsets();
   const dispatch = useAppDispatch();
   
   // Get user ID from Redux (in real app, this would come from auth)
@@ -54,6 +46,10 @@ export const HomeScreen: React.FC = () => {
     welcomeSheetRef.current?.close();
   };
 
+  const handleShowFeedback = () => {
+    feedbackSheetRef.current?.snapToIndex(0);
+  };
+
   const handleFeedbackClose = () => {
     feedbackSheetRef.current?.close();
   };
@@ -67,64 +63,30 @@ export const HomeScreen: React.FC = () => {
     dispatch(resetOnboarding());
   };
 
+  const handleShowBottomSheet = () => {
+    welcomeSheetRef.current?.snapToIndex(0);
+  };
+
   return (
     <GestureHandlerRootView style={styles.container}>
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={[
-          styles.contentContainer,
-          { paddingTop: insets.top + SPACING.md, paddingBottom: insets.bottom + SPACING.md },
-        ]}
-      >
-        <View style={styles.header}>
-          <Text style={styles.title}>Welcome to Your App</Text>
-          <Text style={styles.subtitle}>
-            This is your main screen. The onboarding bottom sheets will appear
-            automatically based on your onboarding status.
-          </Text>
+      <View style={styles.content}>
+        <View style={styles.buttonContainer}>
+          <Button
+            title="Show Bottom Sheet"
+            onPress={handleShowBottomSheet}
+            style={styles.showButton}
+            textStyle={styles.showButtonText}
+          />
         </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Features</Text>
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>🎨 Beautiful Design</Text>
-            <Text style={styles.cardDescription}>
-              Clean and modern UI with smooth animations
-            </Text>
-          </View>
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>⚡️ Fast Performance</Text>
-            <Text style={styles.cardDescription}>
-              Optimized for speed and efficiency
-            </Text>
-          </View>
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>🔒 Secure</Text>
-            <Text style={styles.cardDescription}>
-              Your data is safe with us
-            </Text>
-          </View>
-        </View>
-
-        <View style={styles.debugSection}>
-          <Text style={styles.debugTitle}>Debug Tools</Text>
-          <TouchableOpacity
-            style={styles.debugButton}
-            onPress={handleResetOnboarding}
-          >
-            <Text style={styles.debugButtonText}>Reset Onboarding Flow</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+      </View>
 
       {/* Bottom Sheets */}
-      {shouldShowWelcomeSheet && (
-        <OnboardSheet
-          ref={welcomeSheetRef}
-          userId={userId}
-          onClose={handleWelcomeClose}
-        />
-      )}
+      <OnboardSheet
+        ref={welcomeSheetRef}
+        userId={userId}
+        onClose={handleWelcomeClose}
+        onShowFeedback={handleShowFeedback}
+      />
 
       {shouldShowFeedbackSheet && (
         <FeedbackSheet
@@ -148,77 +110,36 @@ export const HomeScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: '#181818',
   },
-  scrollView: {
+  content: {
     flex: 1,
+    justifyContent: 'flex-end',
+    padding: 20,
+    paddingBottom: 40,
   },
-  contentContainer: {
-    paddingHorizontal: SPACING.lg,
-  },
-  header: {
-    marginBottom: SPACING.xl,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: COLORS.text,
-    marginBottom: SPACING.sm,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: COLORS.textSecondary,
-    lineHeight: 24,
-  },
-  section: {
-    marginBottom: SPACING.xl,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: COLORS.text,
-    marginBottom: SPACING.md,
-  },
-  card: {
-    backgroundColor: COLORS.backgroundSecondary,
-    padding: SPACING.lg,
-    borderRadius: 12,
-    marginBottom: SPACING.md,
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: COLORS.text,
-    marginBottom: SPACING.sm,
-  },
-  cardDescription: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-    lineHeight: 20,
-  },
-  debugSection: {
-    marginTop: SPACING.xl,
-    padding: SPACING.lg,
-    backgroundColor: '#FFF3CD',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#FFE69C',
-  },
-  debugTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#856404',
-    marginBottom: SPACING.md,
-  },
-  debugButton: {
-    backgroundColor: '#FFC107',
-    padding: SPACING.md,
-    borderRadius: 8,
+  buttonContainer: {
+    width: '100%',
     alignItems: 'center',
   },
-  debugButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#000000',
+  showButton: {
+    width: 343,
+    height: 48,
+    opacity: 1,
+    gap: 8,
+    borderRadius: 100,
+    paddingTop: 12,
+    paddingRight: 24,
+    paddingBottom: 12,
+    paddingLeft: 24,
+    backgroundColor: '#000000',
+  },
+  showButtonText: {
+    fontFamily: 'Helvetica',
+    fontWeight: '400',
+    fontSize: 16,
+    lineHeight: 24,
+    textAlign: 'center',
+    color: '#FFFFFF',
   },
 });

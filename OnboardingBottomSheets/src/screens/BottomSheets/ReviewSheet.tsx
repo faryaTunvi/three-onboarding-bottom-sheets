@@ -12,7 +12,6 @@ import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from '@gorhom/botto
 import { Button } from '../../components';
 import { useAppDispatch } from '../../redux/hooks';
 import { setReviewSheetSeen } from '../../redux/slices/onboardingSlice';
-import onboardingService from '../../services/onboardingService';
 
 const { width } = Dimensions.get('window');
 
@@ -50,7 +49,6 @@ export const ReviewSheet = forwardRef<BottomSheet, ReviewSheetProps>(
           
           // Mark sheet as seen after user attempts to rate
           dispatch(setReviewSheetSeen());
-          onboardingService.markSheetSeen(userId, 'review').catch(console.error);
           
           // Close the sheet
           onClose();
@@ -61,17 +59,16 @@ export const ReviewSheet = forwardRef<BottomSheet, ReviewSheetProps>(
         console.error('Error opening store:', error);
         Alert.alert('Error', 'Failed to open store. Please try again.');
       }
-    }, [dispatch, userId, onClose]);
+    }, [dispatch, onClose]);
 
-    const handleMaybeLater = useCallback(async () => {
+    const handleMaybeLater = useCallback(() => {
       try {
         dispatch(setReviewSheetSeen());
-        onboardingService.markSheetSeen(userId, 'review').catch(console.error);
         onClose();
       } catch (error) {
         console.error('Error closing review sheet:', error);
       }
-    }, [dispatch, userId, onClose]);
+    }, [dispatch, onClose]);
 
     const renderBackdrop = useCallback(
       (props: any) => (

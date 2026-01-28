@@ -2,11 +2,10 @@ import { useEffect, useRef } from 'react';
 import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import { setUser } from '../redux/slices/userSlice';
 import { setOnboardingComplete } from '../redux/slices/onboardingSlice';
-import onboardingService from '../services/onboardingService';
 
 /**
  * Custom hook to manage onboarding flow
- * Checks backend for user's onboarding status
+ * UI-only version without backend integration
  */
 export const useOnboardingFlow = (userId: string) => {
   const dispatch = useAppDispatch();
@@ -18,20 +17,17 @@ export const useOnboardingFlow = (userId: string) => {
     // Only check once when userId is available
     if (!userId || hasChecked.current) return;
 
-    const checkOnboardingStatus = async () => {
+    // Simulate onboarding status check with local state
+    const checkOnboardingStatus = () => {
       try {
-        const status = await onboardingService.checkOnboardingStatus(userId);
-        
-        // Update user state
+        // Update user state with mock data
         dispatch(setUser({
-          userId: status.userId,
-          isNewUser: status.isNewUser,
+          userId: userId,
+          isNewUser: true,
         }));
 
-        // If user just completed onboarding, show the first sheet
-        if (status.hasCompletedOnboarding && status.isNewUser) {
-          dispatch(setOnboardingComplete(true));
-        }
+        // Simulate user just completed onboarding
+        dispatch(setOnboardingComplete(true));
 
         hasChecked.current = true;
       } catch (error) {
