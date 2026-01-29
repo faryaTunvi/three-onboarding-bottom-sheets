@@ -50,6 +50,16 @@ export const HomeScreen: React.FC = () => {
     feedbackSheetRef.current?.snapToIndex(0);
   };
 
+  const handleShowReview = () => {
+    // Close onboard sheet first
+    welcomeSheetRef.current?.close();
+    
+    // Open review sheet after a small delay for smooth animation
+    setTimeout(() => {
+      reviewSheetRef.current?.snapToIndex(0);
+    }, 300);
+  };
+
   const handleFeedbackClose = () => {
     feedbackSheetRef.current?.close();
   };
@@ -86,23 +96,20 @@ export const HomeScreen: React.FC = () => {
         userId={userId}
         onClose={handleWelcomeClose}
         onShowFeedback={handleShowFeedback}
+        onShowReview={handleShowReview}
       />
 
-      {shouldShowFeedbackSheet && (
-        <FeedbackSheet
-          ref={feedbackSheetRef}
-          userId={userId}
-          onClose={handleFeedbackClose}
-        />
-      )}
+      <FeedbackSheet
+        ref={feedbackSheetRef}
+        userId={userId}
+        onClose={handleFeedbackClose}
+      />
 
-      {shouldShowReviewSheet && (
-        <ReviewSheet
-          ref={reviewSheetRef}
-          userId={userId}
-          onClose={handleReviewClose}
-        />
-      )}
+      <ReviewSheet
+        ref={reviewSheetRef}
+        userId={userId}
+        onClose={handleReviewClose}
+      />
     </GestureHandlerRootView>
   );
 };

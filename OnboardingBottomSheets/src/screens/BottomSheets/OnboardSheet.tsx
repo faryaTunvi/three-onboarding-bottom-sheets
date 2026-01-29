@@ -15,34 +15,37 @@ const { width } = Dimensions.get('window');
 export interface OnboardSheetProps {
   userId: string;
   onClose: () => void;
-  onShowFeedback: () => void;
+  onShowFeedback?: () => void;
+  onShowReview?: () => void;
 }
 
 export const OnboardSheet = forwardRef<BottomSheet, OnboardSheetProps>(
-  ({ userId, onClose, onShowFeedback }, ref) => {
+  ({ userId, onClose, onShowFeedback, onShowReview }, ref) => {
     const dispatch = useAppDispatch();
     const snapPoints = useMemo(() => [399], []); // Fixed height per Figma
 
     const handleFeedback = useCallback(
       (isLovingIt: boolean) => {
         try {
+          dispatch(setWelcomeSheetSeen());
+          
           if (isLovingIt) {
-            // User loves it - just close and mark as seen
-            console.log('User loves Rizon');
-            dispatch(setWelcomeSheetSeen());
-            onClose();
+            // User loves it - show review sheet
+            if (typeof onShowReview === 'function') {
+              onShowReview();
+            }
           } else {
             // User clicked "Not yet" - show feedback sheet
-            console.log('User not yet loving Rizon - showing feedback');
-            dispatch(setWelcomeSheetSeen());
             onClose();
-            onShowFeedback();
+            if (typeof onShowFeedback === 'function') {
+              onShowFeedback();
+            }
           }
         } catch (error) {
           console.error('Error handling feedback:', error);
         }
       },
-      [dispatch, onClose, onShowFeedback]
+      [dispatch, onClose, onShowFeedback, onShowReview]
     );
 
     const renderBackdrop = useCallback(
@@ -60,7 +63,7 @@ export const OnboardSheet = forwardRef<BottomSheet, OnboardSheetProps>(
     return (
       <BottomSheet
         ref={ref}
-        index={0}
+        index={-1}
         snapPoints={snapPoints}
         enablePanDownToClose={false}
         backdropComponent={renderBackdrop}

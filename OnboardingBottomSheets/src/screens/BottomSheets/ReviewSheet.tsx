@@ -85,7 +85,7 @@ export const ReviewSheet = forwardRef<BottomSheet, ReviewSheetProps>(
     return (
       <BottomSheet
         ref={ref}
-        index={0}
+        index={-1}
         snapPoints={snapPoints}
         enablePanDownToClose={false}
         backdropComponent={renderBackdrop}
