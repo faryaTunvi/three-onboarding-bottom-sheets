@@ -31,7 +31,7 @@ This project follows a **feature-based modular architecture** with clear separat
 - **Axios** - HTTP client for REST API calls
 - **Kotlin** (Android) & **Swift** (iOS) - Native code integration
 
-## 📱 Features
+## Features
 
 ### Three Onboarding Bottom Sheets
 
@@ -59,102 +59,6 @@ This project follows a **feature-based modular architecture** with clear separat
 - **Performance**: Optimized animations on main thread
 - **Modular Design**: Easy to extend and maintain
 - **Error Handling**: Comprehensive try-catch with user feedback
-
-## Setup Instructions
-
-### Prerequisites
-
-- Node.js >= 20
-- React Native development environment setup
-- iOS: Xcode and CocoaPods
-- Android: Android Studio and JDK
-
-### Installation
-
-1. **Clone and install dependencies**:
-```bash
-cd OnboardingBottomSheets
-npm install
-```
-
-2. **iOS Setup**:
-```bash
-cd ios
-bundle install
-bundle exec pod install
-cd ..
-```
-
-3. **Configure API Endpoint**:
-Edit `/src/services/apiService.ts`:
-```typescript
-const API_BASE_URL = 'https://your-api.com'; // Replace with your API URL
-```
-
-4. **Configure Store URLs**:
-Edit `/src/screens/BottomSheets/ReviewSheet.tsx`:
-```typescript
-const APP_STORE_URL = 'https://apps.apple.com/app/idYOUR_APP_ID';
-const GOOGLE_PLAY_URL = 'https://play.google.com/store/apps/details?id=YOUR_PACKAGE_NAME';
-```
-
-### Running the App
-
-**Start Metro Bundler**:
-```bash
-npm start
-```
-
-**iOS**:
-```bash
-npm run ios
-```
-
-**Android**:
-```bash
-npm run android
-```
-
-## Configuration
-
-### Backend Integration
-
-The app expects the following API endpoints:
-
-1. **Check Onboarding Status**:
-   - `GET /onboarding/status/:userId`
-   - Response:
-   ```json
-   {
-     "isNewUser": boolean,
-     "hasCompletedOnboarding": boolean,
-     "userId": string,
-     "timestamp": number
-   }
-   ```
-
-2. **Submit Feedback**:
-   - `POST /feedback`
-   - Payload:
-   ```json
-   {
-     "userId": string,
-     "feedback": string,
-     "timestamp": number,
-     "platform": "ios" | "android"
-   }
-   ```
-
-3. **Mark Sheet Seen**:
-   - `POST /onboarding/sheet-seen`
-   - Payload:
-   ```json
-   {
-     "userId": string,
-     "sheetType": "welcome" | "feedback" | "review",
-     "timestamp": number
-   }
-   ```
 
 ### Customization
 
@@ -201,22 +105,6 @@ Backend Check → Redux Store → Custom Hook → Sheet Display
 - Optimized gesture handling with native driver
 - Minimal re-renders with proper React patterns
 
-## Build for Production
-
-**iOS**:
-```bash
-cd ios
-xcodebuild -workspace OnboardingBottomSheets.xcworkspace \
-  -scheme OnboardingBottomSheets \
-  -configuration Release
-```
-
-**Android**:
-```bash
-cd android
-./gradlew assembleRelease
-```
-
 ## Contributing
 
 This codebase follows:
@@ -225,13 +113,9 @@ This codebase follows:
 - TypeScript strict mode
 - Feature-based folder structure
 
-## Additional Resources
+## Output:
 
-- [React Navigation Docs](https://reactnavigation.org/)
-- [Redux Toolkit Docs](https://redux-toolkit.js.org/)
-- [Gorhom Bottom Sheet](https://gorhom.github.io/react-native-bottom-sheet/)
-- [React Native Reanimated](https://docs.swmansion.com/react-native-reanimated/)
+![Onboard Screenshot](output/1.png)
+![Feedback Screenshot](output/1.png)
+![Review Screenshot](output/1.png)
 
----
-
-**Note**: Replace placeholder URLs and IDs with your actual app configuration before deploying to production.
