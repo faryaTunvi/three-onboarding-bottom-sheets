@@ -117,5 +117,5 @@ This codebase follows:
 
 ![Onboard Screenshot](output/1.png)
 ![Feedback Screenshot](output/2.png)
-![Review Screenshot](output/2.png)
+![Review Screenshot](output/3.png)
 
