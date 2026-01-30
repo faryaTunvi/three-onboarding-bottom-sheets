@@ -4,7 +4,7 @@ export const feedbackSheetStyles = StyleSheet.create({
   contentContainer: {
     flex: 1,
     paddingHorizontal: 24,
-    paddingBottom: 32,
+    paddingBottom: 34,
   },
   handleIndicator: {
     backgroundColor: '#E5E5EA',

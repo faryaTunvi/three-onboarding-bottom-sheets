@@ -1,24 +1,41 @@
 import { StyleSheet } from 'react-native';
 
 export const onboardSheetStyles = StyleSheet.create({
-  bottomSheet: {
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
+  handleIndicatorContainer: {
+    width: '100%',
+    height: 21,
+    opacity: 1,
+    paddingTop: 8,
+    paddingRight: 120,
+    paddingBottom: 8,
+    paddingLeft: 120,
+    gap: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  handleIndicator: {
+    backgroundColor: '#CFD1DC',
+    width: 56,
+    height: 5,
+    borderRadius: 100,
+    opacity: 1,
   },
   contentContainer: {
     flex: 1,
-    paddingHorizontal: 24,
+    width: '100%',
+    height: 399,
+    opacity: 1,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    backgroundColor: '#FFFFFF',
     paddingTop: 24,
-    paddingBottom: 24,
-    gap: 24,
-  },
-  handleIndicator: {
-    backgroundColor: '#E5E5EA',
-    width: 40,
+    paddingHorizontal: 24,
+    paddingBottom: 34,
     alignSelf: 'center',
   },
   logoContainer: {
     alignItems: 'center',
+    paddingBottom: 24,
   },
   logoBox: {
     backgroundColor: '#FFFF13',
@@ -35,7 +52,7 @@ export const onboardSheetStyles = StyleSheet.create({
   },
   textContainer: {
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingBottom: 24,
   },
   title: {
     fontFamily: 'Helvetica',
@@ -54,43 +71,42 @@ export const onboardSheetStyles = StyleSheet.create({
     textAlign: 'center',
     color: '#868AA5',
   },
-  buttonsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  buttonsContainer: {
+    width: '100%',
+    height: 48,
+    opacity: 1,
     gap: 8,
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
-  outlineButton: {
+  leftButton: {
     width: 167.5,
     height: 48,
     backgroundColor: '#ffffff',
     borderWidth: 1,
     borderColor: '#E1E3EB',
     borderRadius: 100,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
   },
-  outlineText: {
+  leftButtonText: {
     fontFamily: 'Helvetica',
     fontWeight: '400',
     fontSize: 16,
-    lineHeight: 24,
     textAlign: 'center',
     color: '#000000',
   },
-  filledText: {
+  rightButtonText: {
     fontFamily: 'Helvetica',
     fontWeight: '400',
     fontSize: 16,
-    lineHeight: 24,
     textAlign: 'center',
     color: '#FFFFFF',
   },
-  filledButton: {
-    flex: 1,
+  rightButton: {
+    width: 167.5,
     height: 48,
-    backgroundColor: '#000',
+    backgroundColor: '#000000',
+     borderWidth: 1,
+    borderColor: '#000000',
     borderRadius: 100,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
   },
 });

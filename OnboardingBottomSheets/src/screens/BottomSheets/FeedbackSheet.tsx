@@ -97,9 +97,9 @@ export const FeedbackSheet = forwardRef<BottomSheet, FeedbackSheetProps>(
     return (
       <BottomSheet
         ref={ref}
-        index={0}
+        index={-1}
         snapPoints={snapPoints}
-        enablePanDownToClose={false}
+        enablePanDownToClose={true}
         backdropComponent={renderBackdrop}
         handleIndicatorStyle={styles.handleIndicator}
       >

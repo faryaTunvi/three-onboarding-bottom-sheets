@@ -2,22 +2,22 @@ import React, { useCallback, useMemo, forwardRef } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
-  Dimensions,
   Platform,
   Linking,
   Alert,
+  Image,
 } from 'react-native';
 import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from '@gorhom/bottom-sheet';
+import LinearGradient from 'react-native-linear-gradient';
 import { Button } from '../../components';
 import { useAppDispatch } from '../../redux/hooks';
 import { setReviewSheetSeen } from '../../redux/slices/onboardingSlice';
+import { reviewSheetStyles as styles } from '../../utils/reviewSheetStyles';
 
-const { width } = Dimensions.get('window');
-
-// App Store / Google Play URLs
-const APP_STORE_URL = 'https://apps.apple.com/app/idYOUR_APP_ID'; // Replace with your App Store ID
-const GOOGLE_PLAY_URL = 'https://play.google.com/store/apps/details?id=YOUR_PACKAGE_NAME'; // Replace with your package name
+// URLs for apps
+const APP_STORE_URL = 'https://apps.apple.com/app/idYOUR_APP_ID';
+const GOOGLE_PLAY_URL =
+  'https://play.google.com/store/apps/details?id=YOUR_PACKAGE_NAME';
 
 export interface ReviewSheetProps {
   userId: string;
@@ -27,7 +27,7 @@ export interface ReviewSheetProps {
 export const ReviewSheet = forwardRef<BottomSheet, ReviewSheetProps>(
   ({ userId, onClose }, ref) => {
     const dispatch = useAppDispatch();
-    const snapPoints = useMemo(() => ['60%'], []);
+    const snapPoints = useMemo(() => ['40%'], []);
 
     const handleRateApp = useCallback(async () => {
       try {
@@ -41,32 +41,17 @@ export const ReviewSheet = forwardRef<BottomSheet, ReviewSheetProps>(
           return;
         }
 
-        // Check if the URL can be opened
         const supported = await Linking.canOpenURL(storeUrl);
-
         if (supported) {
           await Linking.openURL(storeUrl);
-          
-          // Mark sheet as seen after user attempts to rate
           dispatch(setReviewSheetSeen());
-          
-          // Close the sheet
           onClose();
         } else {
-          Alert.alert('Error', `Cannot open ${Platform.OS === 'ios' ? 'App Store' : 'Google Play'}`);
+          Alert.alert('Error', 'Cannot open store link');
         }
       } catch (error) {
         console.error('Error opening store:', error);
         Alert.alert('Error', 'Failed to open store. Please try again.');
-      }
-    }, [dispatch, onClose]);
-
-    const handleMaybeLater = useCallback(() => {
-      try {
-        dispatch(setReviewSheetSeen());
-        onClose();
-      } catch (error) {
-        console.error('Error closing review sheet:', error);
       }
     }, [dispatch, onClose]);
 
@@ -76,7 +61,7 @@ export const ReviewSheet = forwardRef<BottomSheet, ReviewSheetProps>(
           {...props}
           disappearsOnIndex={-1}
           appearsOnIndex={0}
-          opacity={0.5}
+          opacity={0.6}
         />
       ),
       []
@@ -87,37 +72,43 @@ export const ReviewSheet = forwardRef<BottomSheet, ReviewSheetProps>(
         ref={ref}
         index={-1}
         snapPoints={snapPoints}
-        enablePanDownToClose={false}
+        enablePanDownToClose={true}
         backdropComponent={renderBackdrop}
         handleIndicatorStyle={styles.handleIndicator}
       >
         <BottomSheetView style={styles.contentContainer}>
+          {/* Review Icon Section */}
           <View style={styles.imageContainer}>
-            <View style={styles.placeholderImage}>
-              <Text style={styles.placeholderText}>⭐️</Text>
-            </View>
+            <LinearGradient
+              colors={['#000000', '#2A75CF']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              style={styles.iconWrapper}
+            >
+              <Image
+                source={require('../../assets/review.png')}
+                style={styles.reviewImage}
+                resizeMode="contain"
+              />
+            </LinearGradient>
           </View>
 
+          {/* Text Section */}
           <View style={styles.textContainer}>
-            <Text style={styles.title}>Enjoying the App?</Text>
+            <Text style={styles.title}>Got a minute to help us grow?</Text>
             <Text style={styles.description}>
-              Your feedback helps us improve and reach more people. Take a
-              moment to rate us on the {Platform.OS === 'ios' ? 'App Store' : 'Google Play'}!
+              It takes less than a minute and helps us a lot.
             </Text>
           </View>
 
+          {/* Single Button */}
           <View style={styles.buttonContainer}>
             <Button
-              title={`Rate on ${Platform.OS === 'ios' ? 'App Store' : 'Google Play'}`}
+              title="Leave a review"
               onPress={handleRateApp}
               variant="primary"
-              style={styles.rateButton}
-            />
-            <Button
-              title="Maybe Later"
-              onPress={handleMaybeLater}
-              variant="outline"
-              style={styles.laterButton}
+              style={styles.reviewButton}
+              textStyle={styles.reviewButtonText}
             />
           </View>
         </BottomSheetView>
@@ -127,58 +118,3 @@ export const ReviewSheet = forwardRef<BottomSheet, ReviewSheetProps>(
 );
 
 ReviewSheet.displayName = 'ReviewSheet';
-
-const styles = StyleSheet.create({
-  contentContainer: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingBottom: 32,
-  },
-  handleIndicator: {
-    backgroundColor: '#E5E5EA',
-    width: 40,
-  },
-  imageContainer: {
-    alignItems: 'center',
-    marginTop: 16,
-    marginBottom: 24,
-  },
-  placeholderImage: {
-    width: width * 0.4,
-    height: width * 0.4,
-    backgroundColor: '#F2F2F7',
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  placeholderText: {
-    fontSize: 70,
-  },
-  textContainer: {
-    marginBottom: 32,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#1C1C1E',
-    textAlign: 'center',
-    marginBottom: 12,
-  },
-  description: {
-    fontSize: 16,
-    color: '#8E8E93',
-    textAlign: 'center',
-    lineHeight: 24,
-    paddingHorizontal: 8,
-  },
-  buttonContainer: {
-    marginTop: 'auto',
-  },
-  rateButton: {
-    width: '100%',
-    marginBottom: 12,
-  },
-  laterButton: {
-    width: '100%',
-  },
-});

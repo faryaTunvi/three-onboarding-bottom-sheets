@@ -31,16 +31,15 @@ export const HomeScreen: React.FC = () => {
     shouldShowReviewSheet,
   } = useOnboardingFlow(userId);
 
-  // Show appropriate sheet based on flow
+  // Auto open OnboardSheet on app launch
   useEffect(() => {
-    if (shouldShowWelcomeSheet) {
+    // Delay to ensure refs are ready
+    const timer = setTimeout(() => {
       welcomeSheetRef.current?.snapToIndex(0);
-    } else if (shouldShowFeedbackSheet) {
-      feedbackSheetRef.current?.snapToIndex(0);
-    } else if (shouldShowReviewSheet) {
-      reviewSheetRef.current?.snapToIndex(0);
-    }
-  }, [shouldShowWelcomeSheet, shouldShowFeedbackSheet, shouldShowReviewSheet]);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleWelcomeClose = () => {
     welcomeSheetRef.current?.close();
@@ -74,7 +73,14 @@ export const HomeScreen: React.FC = () => {
   };
 
   const handleShowBottomSheet = () => {
-    welcomeSheetRef.current?.snapToIndex(0);
+    // Close any open sheets first
+    feedbackSheetRef.current?.close();
+    reviewSheetRef.current?.close();
+    
+    // Show OnboardSheet
+    setTimeout(() => {
+      welcomeSheetRef.current?.snapToIndex(0);
+    }, 100);
   };
 
   return (

@@ -1,97 +1,237 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Onboarding Bottom Sheets - React Native App
 
-# Getting Started
+A production-ready React Native mobile application featuring three sequential onboarding bottom sheets with best practices in architecture, state management, and UI/UX design.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## Architecture
 
-## Step 1: Start Metro
+This project follows a **feature-based modular architecture** with clear separation of concerns:
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
-
-To start the Metro dev server, run the following command from the root of your React Native project:
-
-```sh
-# Using npm
-npm start
-
-# OR using Yarn
-yarn start
+```
+/src
+  /components        # Reusable UI elements (Button, CustomInput)
+  /navigation        # React Navigation setup
+  /redux             # Redux Toolkit slices and store
+  /screens           
+    /BottomSheets    # OnboardSheet, FeedbackSheet, ReviewSheet
+    HomeScreen.tsx   # Main application screen
+  /services          # API communication layer
+  /utils             # Helpers, hooks, constants
+  /assets            # Images, icons
 ```
 
-## Step 2: Build and run your app
+## Tech Stack
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+- **React Native** 0.83.1 - Cross-platform mobile framework
+- **TypeScript** - Type safety and improved DX
+- **React Navigation** - Navigation management
+- **Redux Toolkit** - State management
+- **@gorhom/bottom-sheet** - High-performance bottom sheets
+- **React Native Gesture Handler** - Native-driven gesture handling
+- **React Native Reanimated** - Smooth 60fps animations
+- **Axios** - HTTP client for REST API calls
+- **Kotlin** (Android) & **Swift** (iOS) - Native code integration
 
-### Android
+## 📱 Features
 
-```sh
-# Using npm
-npm run android
+### Three Onboarding Bottom Sheets
 
-# OR using Yarn
-yarn android
+1. **Welcome Sheet** - Appears after initial onboarding completion
+   - Triggered by backend onboarding status
+   - Shows welcome message and introduction
+   - Dismissible via "Get Started" button
+
+2. **Feedback Sheet** - Appears after welcome sheet
+   - Custom input component with character counter
+   - Backend API integration for feedback submission
+   - Race condition prevention for API calls
+   - "Send Feedback" or "Skip for Now" options
+
+3. **Review Sheet** - Final onboarding step
+   - Platform-specific store redirects (App Store / Google Play)
+   - Deep linking to store pages
+   - "Rate Now" or "Maybe Later" options
+
+### Architecture Highlights
+
+- **State Management**: Redux Toolkit with typed hooks
+- **API Layer**: Centralized service classes with interceptors
+- **Type Safety**: Full TypeScript coverage
+- **Performance**: Optimized animations on main thread
+- **Modular Design**: Easy to extend and maintain
+- **Error Handling**: Comprehensive try-catch with user feedback
+
+## Setup Instructions
+
+### Prerequisites
+
+- Node.js >= 20
+- React Native development environment setup
+- iOS: Xcode and CocoaPods
+- Android: Android Studio and JDK
+
+### Installation
+
+1. **Clone and install dependencies**:
+```bash
+cd OnboardingBottomSheets
+npm install
 ```
 
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
+2. **iOS Setup**:
+```bash
+cd ios
 bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
 bundle exec pod install
+cd ..
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+3. **Configure API Endpoint**:
+Edit `/src/services/apiService.ts`:
+```typescript
+const API_BASE_URL = 'https://your-api.com'; // Replace with your API URL
+```
 
-```sh
-# Using npm
+4. **Configure Store URLs**:
+Edit `/src/screens/BottomSheets/ReviewSheet.tsx`:
+```typescript
+const APP_STORE_URL = 'https://apps.apple.com/app/idYOUR_APP_ID';
+const GOOGLE_PLAY_URL = 'https://play.google.com/store/apps/details?id=YOUR_PACKAGE_NAME';
+```
+
+### Running the App
+
+**Start Metro Bundler**:
+```bash
+npm start
+```
+
+**iOS**:
+```bash
 npm run ios
-
-# OR using Yarn
-yarn ios
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+**Android**:
+```bash
+npm run android
+```
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+## Configuration
 
-## Step 3: Modify your app
+### Backend Integration
 
-Now that you have successfully run the app, let's make changes!
+The app expects the following API endpoints:
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+1. **Check Onboarding Status**:
+   - `GET /onboarding/status/:userId`
+   - Response:
+   ```json
+   {
+     "isNewUser": boolean,
+     "hasCompletedOnboarding": boolean,
+     "userId": string,
+     "timestamp": number
+   }
+   ```
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+2. **Submit Feedback**:
+   - `POST /feedback`
+   - Payload:
+   ```json
+   {
+     "userId": string,
+     "feedback": string,
+     "timestamp": number,
+     "platform": "ios" | "android"
+   }
+   ```
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+3. **Mark Sheet Seen**:
+   - `POST /onboarding/sheet-seen`
+   - Payload:
+   ```json
+   {
+     "userId": string,
+     "sheetType": "welcome" | "feedback" | "review",
+     "timestamp": number
+   }
+   ```
 
-## Congratulations! :tada:
+### Customization
 
-You've successfully run and modified your React Native App. :partying_face:
+**Colors & Styling**:
+Modify `/src/utils/constants.ts` to adjust app-wide colors and spacing.
 
-### Now what?
+**Bottom Sheet Behavior**:
+Each bottom sheet component can be customized:
+- Snap points
+- Backdrop opacity
+- Handle indicator style
+- Pan gesture behavior
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+## Testing
 
-# Troubleshooting
+The app includes a debug section on the Home screen with a "Reset Onboarding Flow" button for testing the complete sheet sequence without backend integration.
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+## Key Implementation Details
 
-# Learn More
+### Race Condition Prevention
 
-To learn more about React Native, take a look at the following resources:
+The `FeedbackSheet` uses a ref to prevent race conditions:
+```typescript
+const isSubmittingRef = useRef(false);
+```
+This ensures the API request completes before closing the sheet.
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+### State Flow
+
+```
+Backend Check → Redux Store → Custom Hook → Sheet Display
+```
+
+1. `useOnboardingFlow` hook checks backend status
+2. Redux state updated based on response
+3. Appropriate sheet displays automatically
+4. User actions update Redux state
+5. Next sheet displays in sequence
+
+### Performance Optimizations
+
+- Memoized callbacks to prevent unnecessary re-renders
+- Lazy loading of bottom sheets
+- Optimized gesture handling with native driver
+- Minimal re-renders with proper React patterns
+
+## Build for Production
+
+**iOS**:
+```bash
+cd ios
+xcodebuild -workspace OnboardingBottomSheets.xcworkspace \
+  -scheme OnboardingBottomSheets \
+  -configuration Release
+```
+
+**Android**:
+```bash
+cd android
+./gradlew assembleRelease
+```
+
+## Contributing
+
+This codebase follows:
+- ESLint configuration for code quality
+- Prettier for code formatting
+- TypeScript strict mode
+- Feature-based folder structure
+
+## Additional Resources
+
+- [React Navigation Docs](https://reactnavigation.org/)
+- [Redux Toolkit Docs](https://redux-toolkit.js.org/)
+- [Gorhom Bottom Sheet](https://gorhom.github.io/react-native-bottom-sheet/)
+- [React Native Reanimated](https://docs.swmansion.com/react-native-reanimated/)
+
+---
+
+**Note**: Replace placeholder URLs and IDs with your actual app configuration before deploying to production.

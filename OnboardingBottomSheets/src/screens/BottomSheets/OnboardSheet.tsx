@@ -29,18 +29,23 @@ export const OnboardSheet = forwardRef<BottomSheet, OnboardSheetProps>(
         try {
           dispatch(setWelcomeSheetSeen());
           
-          if (isLovingIt) {
-            // User loves it - show review sheet
-            if (typeof onShowReview === 'function') {
-              onShowReview();
+          // Close current sheet first
+          onClose();
+          
+          // Open next sheet after animation completes
+          setTimeout(() => {
+            if (isLovingIt) {
+              // User loves it - show review sheet
+              if (typeof onShowReview === 'function') {
+                onShowReview();
+              }
+            } else {
+              // User clicked "Not yet" - show feedback sheet
+              if (typeof onShowFeedback === 'function') {
+                onShowFeedback();
+              }
             }
-          } else {
-            // User clicked "Not yet" - show feedback sheet
-            onClose();
-            if (typeof onShowFeedback === 'function') {
-              onShowFeedback();
-            }
-          }
+          }, 300);
         } catch (error) {
           console.error('Error handling feedback:', error);
         }
@@ -65,10 +70,9 @@ export const OnboardSheet = forwardRef<BottomSheet, OnboardSheetProps>(
         ref={ref}
         index={-1}
         snapPoints={snapPoints}
-        enablePanDownToClose={false}
+        enablePanDownToClose={true}
         backdropComponent={renderBackdrop}
         handleIndicatorStyle={styles.handleIndicator}
-        style={styles.bottomSheet}
       >
         <BottomSheetView style={styles.contentContainer}>
           {/* Logo Box */}
@@ -87,22 +91,23 @@ export const OnboardSheet = forwardRef<BottomSheet, OnboardSheetProps>(
           </View>
 
           {/* Buttons */}
-          <View style={styles.buttonsRow}>
+          <View style={styles.buttonsContainer}>
             <Button
               title="Not yet"
               variant="secondary"
               onPress={() => handleFeedback(false)}
-              style={styles.outlineButton}
-              textStyle={styles.outlineText}
+              style={styles.leftButton}
+              textStyle={styles.leftButtonText}
             />
             <Button
               title="Yes, loving it"
               variant="primary"
               onPress={() => handleFeedback(true)}
-              style={styles.filledButton}
-              textStyle={styles.filledText}
+              style={styles.rightButton}
+              textStyle={styles.rightButtonText}
             />
           </View>
+
         </BottomSheetView>
       </BottomSheet>
     );
