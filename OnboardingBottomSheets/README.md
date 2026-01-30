@@ -116,6 +116,6 @@ This codebase follows:
 ## Output:
 
 ![Onboard Screenshot](output/1.png)
-![Feedback Screenshot](output/1.png)
-![Review Screenshot](output/1.png)
+![Feedback Screenshot](output/2.png)
+![Review Screenshot](output/2.png)
 
