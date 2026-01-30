@@ -83,12 +83,13 @@ export const FeedbackSheet = forwardRef<BottomSheet, FeedbackSheetProps>(
     }, [dispatch, onClose]);
 
     const handleSheetChange = useCallback((index: number) => {
-      // When sheet closes (index -1), reset state
+      // When sheet closes (index -1), reset state and trigger onClose
       if (index === -1) {
         setFeedback('');
         setError('');
+        onClose();
       }
-    }, []);
+    }, [onClose]);
 
     const renderBackdrop = useCallback(
       (props: any) => (

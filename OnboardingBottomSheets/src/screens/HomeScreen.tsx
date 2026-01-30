@@ -61,6 +61,11 @@ export const HomeScreen: React.FC = () => {
 
   const handleFeedbackClose = () => {
     feedbackSheetRef.current?.close();
+    
+    // Show OnboardSheet after closing feedback
+    setTimeout(() => {
+      welcomeSheetRef.current?.snapToIndex(0);
+    }, 300);
   };
 
   const handleReviewClose = () => {
@@ -86,14 +91,7 @@ export const HomeScreen: React.FC = () => {
   return (
     <GestureHandlerRootView style={styles.container}>
       <View style={styles.content}>
-        <View style={styles.buttonContainer}>
-          <Button
-            title="Show Bottom Sheet"
-            onPress={handleShowBottomSheet}
-            style={styles.showButton}
-            textStyle={styles.showButtonText}
-          />
-        </View>
+        {/* Button removed */}
       </View>
 
       {/* Bottom Sheets */}
