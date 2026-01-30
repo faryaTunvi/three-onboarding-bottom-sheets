@@ -2,6 +2,7 @@ import React, { useCallback, useMemo, forwardRef } from 'react';
 import {
   View,
   Text,
+  Image,
   Dimensions,
 } from 'react-native';
 import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from '@gorhom/bottom-sheet';
@@ -75,11 +76,12 @@ export const OnboardSheet = forwardRef<BottomSheet, OnboardSheetProps>(
         handleIndicatorStyle={styles.handleIndicator}
       >
         <BottomSheetView style={styles.contentContainer}>
-          {/* Logo Box */}
+          {/* Logo */}
           <View style={styles.logoContainer}>
-            <View style={styles.logoBox}>
-              <Text style={styles.logoText}>RIZON</Text>
-            </View>
+            <Image 
+              source={require('../../assets/logo4.png')} 
+              style={styles.logo}
+            />
           </View>
 
           {/* Text Section */}

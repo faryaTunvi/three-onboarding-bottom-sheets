@@ -82,6 +82,14 @@ export const FeedbackSheet = forwardRef<BottomSheet, FeedbackSheetProps>(
       }
     }, [dispatch, onClose]);
 
+    const handleSheetChange = useCallback((index: number) => {
+      // When sheet closes (index -1), reset state
+      if (index === -1) {
+        setFeedback('');
+        setError('');
+      }
+    }, []);
+
     const renderBackdrop = useCallback(
       (props: any) => (
         <BottomSheetBackdrop
@@ -102,6 +110,7 @@ export const FeedbackSheet = forwardRef<BottomSheet, FeedbackSheetProps>(
         enablePanDownToClose={true}
         backdropComponent={renderBackdrop}
         handleIndicatorStyle={styles.handleIndicator}
+        onChange={handleSheetChange}
       >
         <BottomSheetView style={styles.contentContainer}>
           <View style={styles.textContainer}>
@@ -123,7 +132,7 @@ export const FeedbackSheet = forwardRef<BottomSheet, FeedbackSheetProps>(
               numberOfLines={4}
               maxCharacters={500}
               error={error}
-              containerStyle={styles.input}
+              containerStyle={styles.inputContainer}
               style={styles.textArea}
               editable={!isSubmitting}
             />

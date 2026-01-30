@@ -27,7 +27,7 @@ export interface ReviewSheetProps {
 export const ReviewSheet = forwardRef<BottomSheet, ReviewSheetProps>(
   ({ userId, onClose }, ref) => {
     const dispatch = useAppDispatch();
-    const snapPoints = useMemo(() => ['40%'], []);
+    const snapPoints = useMemo(() => [375], []);
 
     const handleRateApp = useCallback(async () => {
       try {

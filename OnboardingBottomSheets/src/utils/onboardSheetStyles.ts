@@ -1,18 +1,6 @@
 import { StyleSheet } from 'react-native';
 
 export const onboardSheetStyles = StyleSheet.create({
-  handleIndicatorContainer: {
-    width: '100%',
-    height: 21,
-    opacity: 1,
-    paddingTop: 8,
-    paddingRight: 120,
-    paddingBottom: 8,
-    paddingLeft: 120,
-    gap: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   handleIndicator: {
     backgroundColor: '#CFD1DC',
     width: 56,
@@ -21,7 +9,6 @@ export const onboardSheetStyles = StyleSheet.create({
     opacity: 1,
   },
   contentContainer: {
-    flex: 1,
     width: '100%',
     height: 399,
     opacity: 1,
@@ -35,20 +22,13 @@ export const onboardSheetStyles = StyleSheet.create({
   },
   logoContainer: {
     alignItems: 'center',
-    paddingBottom: 24,
+    height: 120,
+    marginBottom: 24,
   },
-  logoBox: {
-    backgroundColor: '#FFFF13',
+  logo: {
     width: 120,
     height: 120,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  logoText: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#000',
+    resizeMode: 'contain',
   },
   textContainer: {
     alignItems: 'center',
@@ -58,7 +38,7 @@ export const onboardSheetStyles = StyleSheet.create({
     fontFamily: 'Helvetica',
     fontWeight: '400',
     fontSize: 24,
-    lineHeight: 32,
+    lineHeight: 34,
     textAlign: 'center',
     color: '#000000',
     marginBottom: 8,
@@ -105,7 +85,7 @@ export const onboardSheetStyles = StyleSheet.create({
     width: 167.5,
     height: 48,
     backgroundColor: '#000000',
-     borderWidth: 1,
+    borderWidth: 1,
     borderColor: '#000000',
     borderRadius: 100,
   },

@@ -1,24 +1,34 @@
 import { StyleSheet } from 'react-native';
 
 export const feedbackSheetStyles = StyleSheet.create({
+  handleIndicator: {
+    backgroundColor: '#CFD1DC',
+    width: 56,
+    height: 5,
+    borderRadius: 100,
+    opacity: 1,
+  },
   contentContainer: {
-    flex: 1,
+    width: '100%',
+    height: 335,
+    opacity: 1,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    backgroundColor: '#FFFFFF',
+    paddingTop: 24,
     paddingHorizontal: 24,
     paddingBottom: 34,
-  },
-  handleIndicator: {
-    backgroundColor: '#E5E5EA',
-    width: 40,
+    alignSelf: 'center',
   },
   textContainer: {
-    marginBottom: 0,
-    marginTop: 16,
+    alignItems: 'center',
+    paddingBottom: 24,
   },
   title: {
     fontFamily: 'Helvetica',
     fontWeight: '400',
     fontSize: 24,
-    lineHeight: 32,
+    lineHeight: 34,
     textAlign: 'center',
     color: '#000000',
     marginBottom: 12,
@@ -32,21 +42,28 @@ export const feedbackSheetStyles = StyleSheet.create({
     color: '#868AA5',
   },
   inputContainer: {
-    marginTop: 16,
+    width: '100%',
+    height: 64,
     marginBottom: 24,
     alignSelf: 'center',
-    width: '100%',
   },
-  input: {
-    marginBottom: 0,
+  placeholder: {
+    fontFamily: 'Helvetica',
+    fontWeight: '400',
+    fontSize: 16,
+    lineHeight: 24,
+    color: '#CFD1DC',
   },
   textArea: {
     height: 64,
+    fontFamily: 'Helvetica',
+    fontWeight: '400',
+    fontSize: 16,
+    lineHeight: 24,
     textAlignVertical: 'center',
-    paddingTop: 20,
-    paddingBottom: 20,
-    paddingLeft: 16,
-    paddingRight: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    includeFontPadding: false,
   },
   buttonContainer: {
     marginTop: 'auto',
@@ -62,7 +79,7 @@ export const feedbackSheetStyles = StyleSheet.create({
     paddingBottom: 12,
     paddingLeft: 24,
     backgroundColor: '#000000',
-    marginBottom: 12,
+    marginBottom: 16,
   },
   submitButtonText: {
     fontFamily: 'Helvetica',
