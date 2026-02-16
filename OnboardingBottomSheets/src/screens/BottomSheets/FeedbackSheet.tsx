@@ -10,6 +10,7 @@ import { Button, CustomInput } from '../../components';
 import { useAppDispatch } from '../../redux/hooks';
 import { setFeedbackSheetSeen } from '../../redux/slices/onboardingSlice';
 import { feedbackSheetStyles as styles } from '../../utils/feedbackSheetStyles';
+import apiService from '../../services/apiService';
 
 export interface FeedbackSheetProps {
   userId: string;
@@ -28,7 +29,7 @@ export const FeedbackSheet = forwardRef<BottomSheet, FeedbackSheetProps>(
     
     const snapPoints = useMemo(() => ['70%'], []);
 
-    const handleSubmitFeedback = useCallback(() => {
+    const handleSubmitFeedback = useCallback(async () => {
       // Prevent race conditions - don't allow multiple simultaneous submissions
       if (isSubmittingRef.current) {
         console.log('Feedback submission already in progress');
@@ -46,32 +47,55 @@ export const FeedbackSheet = forwardRef<BottomSheet, FeedbackSheetProps>(
         setIsSubmitting(true);
         setError('');
 
-        // Log feedback locally (UI-only mode)
-        console.log('Feedback submitted (UI-only):', {
-          userId,
-          feedback: feedback.trim(),
-          timestamp: Date.now(),
-          platform: Platform.OS,
-        });
+        // Submit feedback to backend
+        const response = await apiService.submitFeedback(
+          feedback.trim(),
+          Platform.OS
+        );
 
-        // Update Redux state
-        dispatch(setFeedbackSheetSeen());
+        if (response.success) {
+          console.log('Feedback submitted successfully:', response.feedback_id);
 
-        // Show success message
-        Alert.alert('Thank You!', 'Your feedback has been recorded.');
+          // Update Redux state
+          dispatch(setFeedbackSheetSeen());
 
-        // Close the sheet
-        onClose();
-      } catch (error) {
+          // Show success message
+          Alert.alert('Thank You!', 'Your feedback has been submitted successfully.');
+
+          // Clear the feedback
+          setFeedback('');
+
+          // Close the sheet after a short delay
+          setTimeout(() => {
+            onClose();
+          }, 300);
+        } else {
+          throw new Error('Failed to submit feedback');
+        }
+      } catch (error: any) {
         console.error('Error submitting feedback:', error);
-        setError('Failed to submit feedback. Please try again.');
-        Alert.alert('Error', 'Failed to submit feedback. Please try again.');
+        const errorMessage = 
+          error.response?.data?.error || 
+          'Failed to submit feedback. Please try again.';
+        setError(errorMessage);
+        
+        // Show error alert with retry option
+        Alert.alert(
+          'Error',
+          errorMessage,
+          [
+            {
+              text: 'OK',
+              style: 'default',
+            },
+          ]
+        );
       } finally {
         // Reset the submission state
         isSubmittingRef.current = false;
         setIsSubmitting(false);
       }
-    }, [feedback, userId, dispatch, onClose]);
+    }, [feedback, dispatch, onClose]);
 
     const handleSkip = useCallback(() => {
       try {

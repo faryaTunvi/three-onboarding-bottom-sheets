@@ -1,8 +1,10 @@
 // Mock API responses for testing without a backend
+// Note: This file is kept for reference but is no longer used.
+// The app now integrates with a real Go backend server.
 
 export const mockOnboardingStatus = {
   isNewUser: true,
-  hasCompletedOnboarding: true,
+  hasCompletedOnboarding: false,
   userId: 'demo-user-123',
   timestamp: Date.now(),
 };
@@ -13,6 +15,12 @@ export const mockFeedbackResponse = {
   feedbackId: 'feedback-' + Date.now(),
 };
 
-// You can import and use these in onboardingService.ts for testing
-// Example:
-// return mockOnboardingStatus; // Instead of API call
+export const mockAuthResponse = {
+  token: 'mock-jwt-token',
+  user_id: 'demo-user-123',
+  email: 'demo@example.com',
+  is_new_user: true,
+};
+
+// For testing purposes, you can use these mock responses
+// by temporarily modifying apiService.ts to return these instead of making API calls

@@ -9,40 +9,44 @@ import {
   ReviewSheet,
 } from './BottomSheets';
 import { useAppSelector, useAppDispatch } from '../redux/hooks';
-import { useOnboardingFlow } from '../utils';
-import { resetOnboarding } from '../redux/slices/onboardingSlice';
+import { setOnboardingCompleted } from '../redux/slices/authSlice';
 import { RootState } from '../redux/store';
 
 export const HomeScreen: React.FC = () => {
   const dispatch = useAppDispatch();
   
-  // Get user ID from Redux (in real app, this would come from auth)
-  const userId = useAppSelector((state: RootState) => state.user.userId) || 'demo-user-123';
+  // Get auth state
+  const { userId, isNewUser, hasCompletedOnboarding } = useAppSelector(
+    (state: RootState) => state.auth
+  );
+  
+  // Get onboarding state
+  const { hasSeenWelcomeSheet } = useAppSelector(
+    (state: RootState) => state.onboarding
+  );
   
   // Refs for bottom sheets
   const welcomeSheetRef = useRef<BottomSheet>(null);
   const feedbackSheetRef = useRef<BottomSheet>(null);
   const reviewSheetRef = useRef<BottomSheet>(null);
 
-  // Use custom hook to manage onboarding flow
-  const {
-    shouldShowWelcomeSheet,
-    shouldShowFeedbackSheet,
-    shouldShowReviewSheet,
-  } = useOnboardingFlow(userId);
-
-  // Auto open OnboardSheet on app launch
+  // Auto open OnboardSheet for new users who haven't seen it
   useEffect(() => {
-    // Delay to ensure refs are ready
-    const timer = setTimeout(() => {
-      welcomeSheetRef.current?.snapToIndex(0);
-    }, 500);
+    // Show onboarding only for authenticated users who are new and haven't completed onboarding
+    if (userId && !hasCompletedOnboarding && !hasSeenWelcomeSheet) {
+      // Delay to ensure refs are ready
+      const timer = setTimeout(() => {
+        welcomeSheetRef.current?.snapToIndex(0);
+      }, 500);
 
-    return () => clearTimeout(timer);
-  }, []);
+      return () => clearTimeout(timer);
+    }
+  }, [userId, hasCompletedOnboarding, hasSeenWelcomeSheet]);
 
   const handleWelcomeClose = () => {
     welcomeSheetRef.current?.close();
+    // Mark onboarding as completed when they close the welcome sheet
+    dispatch(setOnboardingCompleted());
   };
 
   const handleShowFeedback = () => {
@@ -53,6 +57,9 @@ export const HomeScreen: React.FC = () => {
     // Close onboard sheet first
     welcomeSheetRef.current?.close();
     
+    // Mark onboarding as completed
+    dispatch(setOnboardingCompleted());
+    
     // Open review sheet after a small delay for smooth animation
     setTimeout(() => {
       reviewSheetRef.current?.snapToIndex(0);
@@ -62,42 +69,24 @@ export const HomeScreen: React.FC = () => {
   const handleFeedbackClose = () => {
     feedbackSheetRef.current?.close();
     
-    // Show OnboardSheet after closing feedback
-    setTimeout(() => {
-      welcomeSheetRef.current?.snapToIndex(0);
-    }, 300);
+    // Mark onboarding as completed after feedback
+    dispatch(setOnboardingCompleted());
   };
 
   const handleReviewClose = () => {
     reviewSheetRef.current?.close();
   };
 
-  // Debug: Reset onboarding (for testing)
-  const handleResetOnboarding = () => {
-    dispatch(resetOnboarding());
-  };
-
-  const handleShowBottomSheet = () => {
-    // Close any open sheets first
-    feedbackSheetRef.current?.close();
-    reviewSheetRef.current?.close();
-    
-    // Show OnboardSheet
-    setTimeout(() => {
-      welcomeSheetRef.current?.snapToIndex(0);
-    }, 100);
-  };
-
   return (
     <GestureHandlerRootView style={styles.container}>
       <View style={styles.content}>
-        {/* Button removed */}
+        {/* Empty content - sheets will appear automatically */}
       </View>
 
       {/* Bottom Sheets */}
       <OnboardSheet
         ref={welcomeSheetRef}
-        userId={userId}
+        userId={userId || 'unknown'}
         onClose={handleWelcomeClose}
         onShowFeedback={handleShowFeedback}
         onShowReview={handleShowReview}
@@ -105,13 +94,13 @@ export const HomeScreen: React.FC = () => {
 
       <FeedbackSheet
         ref={feedbackSheetRef}
-        userId={userId}
+        userId={userId || 'unknown'}
         onClose={handleFeedbackClose}
       />
 
       <ReviewSheet
         ref={reviewSheetRef}
-        userId={userId}
+        userId={userId || 'unknown'}
         onClose={handleReviewClose}
       />
     </GestureHandlerRootView>
@@ -128,29 +117,5 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     padding: 20,
     paddingBottom: 40,
-  },
-  buttonContainer: {
-    width: '100%',
-    alignItems: 'center',
-  },
-  showButton: {
-    width: 343,
-    height: 48,
-    opacity: 1,
-    gap: 8,
-    borderRadius: 100,
-    paddingTop: 12,
-    paddingRight: 24,
-    paddingBottom: 12,
-    paddingLeft: 24,
-    backgroundColor: '#000000',
-  },
-  showButtonText: {
-    fontFamily: 'Helvetica',
-    fontWeight: '400',
-    fontSize: 16,
-    lineHeight: 24,
-    textAlign: 'center',
-    color: '#FFFFFF',
   },
 });
