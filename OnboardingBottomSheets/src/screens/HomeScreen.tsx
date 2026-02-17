@@ -1,5 +1,5 @@
-import React, { useRef, useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { useRef, useEffect, useState } from 'react';
+import { StyleSheet, View, Text, ActivityIndicator } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import BottomSheet from '@gorhom/bottom-sheet';
 import { Button } from '../components';
@@ -14,9 +14,10 @@ import { RootState } from '../redux/store';
 
 export const HomeScreen: React.FC = () => {
   const dispatch = useAppDispatch();
+  const [isInitialized, setIsInitialized] = useState(false);
   
   // Get auth state
-  const { userId, isNewUser, hasCompletedOnboarding } = useAppSelector(
+  const { userId, isNewUser, hasCompletedOnboarding, email } = useAppSelector(
     (state: RootState) => state.auth
   );
   
@@ -30,57 +31,131 @@ export const HomeScreen: React.FC = () => {
   const feedbackSheetRef = useRef<BottomSheet>(null);
   const reviewSheetRef = useRef<BottomSheet>(null);
 
+  // Initialize screen
+  useEffect(() => {
+    console.log('📱 HomeScreen mounted with state:', {
+      userId,
+      email,
+      isNewUser,
+      hasCompletedOnboarding,
+      hasSeenWelcomeSheet
+    });
+
+    // Delay to ensure Redux state is fully loaded and navigation is complete
+    const initTimer = setTimeout(() => {
+      console.log('✅ HomeScreen initialized');
+      setIsInitialized(true);
+    }, 500);
+
+    return () => {
+      console.log('📱 HomeScreen unmounting');
+      clearTimeout(initTimer);
+    };
+  }, []);
+
   // Auto open OnboardSheet for new users who haven't seen it
   useEffect(() => {
+    if (!isInitialized) {
+      console.log('⏳ HomeScreen not yet initialized, waiting...');
+      return;
+    }
+
     // Show onboarding only for authenticated users who are new and haven't completed onboarding
-    if (userId && !hasCompletedOnboarding && !hasSeenWelcomeSheet) {
-      // Delay to ensure refs are ready
+    if (userId && isNewUser && !hasCompletedOnboarding && !hasSeenWelcomeSheet) {
+      console.log('🎊 Opening OnboardSheet for new user:', {
+        userId,
+        isNewUser,
+        hasCompletedOnboarding,
+        hasSeenWelcomeSheet
+      });
+      
+      // Additional delay to ensure refs are ready and screen is fully rendered
       const timer = setTimeout(() => {
+        console.log('📱 Triggering OnboardSheet open...');
         welcomeSheetRef.current?.snapToIndex(0);
-      }, 500);
+      }, 1000);
 
       return () => clearTimeout(timer);
+    } else {
+      console.log('ℹ️ OnboardSheet conditions not met:', {
+        userId: !!userId,
+        isNewUser,
+        hasCompletedOnboarding,
+        hasSeenWelcomeSheet,
+        reason: !userId 
+          ? 'No userId' 
+          : !isNewUser 
+          ? 'Not a new user' 
+          : hasCompletedOnboarding 
+          ? 'Already completed onboarding'
+          : hasSeenWelcomeSheet
+          ? 'Already seen welcome sheet'
+          : 'Unknown'
+      });
     }
-  }, [userId, hasCompletedOnboarding, hasSeenWelcomeSheet]);
+  }, [userId, isNewUser, hasCompletedOnboarding, hasSeenWelcomeSheet, isInitialized]);
 
   const handleWelcomeClose = () => {
+    console.log('👋 Closing welcome sheet');
     welcomeSheetRef.current?.close();
-    // Mark onboarding as completed when they close the welcome sheet
     dispatch(setOnboardingCompleted());
   };
 
   const handleShowFeedback = () => {
-    feedbackSheetRef.current?.snapToIndex(0);
+    console.log('💬 Opening feedback sheet');
+    welcomeSheetRef.current?.close();
+    dispatch(setOnboardingCompleted());
+    
+    setTimeout(() => {
+      feedbackSheetRef.current?.snapToIndex(0);
+    }, 300);
   };
 
   const handleShowReview = () => {
-    // Close onboard sheet first
+    console.log('⭐ Opening review sheet');
     welcomeSheetRef.current?.close();
-    
-    // Mark onboarding as completed
     dispatch(setOnboardingCompleted());
     
-    // Open review sheet after a small delay for smooth animation
     setTimeout(() => {
       reviewSheetRef.current?.snapToIndex(0);
     }, 300);
   };
 
   const handleFeedbackClose = () => {
+    console.log('💬 Closing feedback sheet');
     feedbackSheetRef.current?.close();
-    
-    // Mark onboarding as completed after feedback
-    dispatch(setOnboardingCompleted());
   };
 
   const handleReviewClose = () => {
+    console.log('⭐ Closing review sheet');
     reviewSheetRef.current?.close();
   };
+
+  // Show loading state while initializing
+  if (!isInitialized) {
+    return (
+      <GestureHandlerRootView style={styles.container}>
+        <View style={[styles.content, styles.centered]}>
+          <ActivityIndicator size="large" color="#2A75CF" />
+          <Text style={styles.loadingText}>Loading...</Text>
+        </View>
+      </GestureHandlerRootView>
+    );
+  }
 
   return (
     <GestureHandlerRootView style={styles.container}>
       <View style={styles.content}>
-        {/* Empty content - sheets will appear automatically */}
+        {/* Fallback content when no sheets are open */}
+        <View style={styles.centered}>
+          <Text style={styles.welcomeText}>Welcome to the App</Text>
+          {email && (
+            <Text style={styles.emailText}>{email}</Text>
+          )}
+          {hasCompletedOnboarding && (
+            <Text style={styles.statusText}>You're all set! 🎉</Text>
+          )}
+        </View>
       </View>
 
       {/* Bottom Sheets */}
@@ -117,5 +192,30 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     padding: 20,
     paddingBottom: 40,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  welcomeText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 8,
+  },
+  emailText: {
+    fontSize: 16,
+    color: '#2A75CF',
+    marginBottom: 16,
+  },
+  statusText: {
+    fontSize: 16,
+    color: '#4CAF50',
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#AAAAAA',
+    marginTop: 16,
   },
 });

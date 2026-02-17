@@ -9,9 +9,15 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	// Load environment variables from .env file
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found or error loading it, using environment variables")
+	}
+
 	// Initialize services
 	emailService := services.NewEmailService()
 	authService := services.NewAuthService(emailService)
@@ -35,6 +41,9 @@ func main() {
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
 	})
+
+	// Web routes (for email links)
+	router.GET("/auth/verify", authHandler.VerifyMagicLinkWeb)
 
 	// Auth routes
 	authRoutes := router.Group("/api/auth")

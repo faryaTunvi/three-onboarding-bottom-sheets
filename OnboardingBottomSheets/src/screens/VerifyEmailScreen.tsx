@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 import { useAppDispatch } from '../redux/hooks';
 import { setLoading, setError, setAuthSuccess } from '../redux/slices/authSlice';
+import { resetOnboarding } from '../redux/slices/onboardingSlice';
 import { Button } from '../components';
 import apiService from '../services/apiService';
 
@@ -31,27 +32,47 @@ export const VerifyEmailScreen: React.FC<VerifyEmailScreenProps> = ({ route, nav
     console.log('📧 Token:', token);
     
     if (token) {
+      console.log('✅ Token found, starting verification...');
       verifyToken();
     } else {
+      console.log('❌ No token found in route params');
       setVerificationState('error');
       setErrorMessage('Invalid verification link - no token found');
       dispatch(setError('Invalid verification link'));
+      dispatch(setLoading(false));
     }
+
+    // Cleanup on unmount
+    return () => {
+      console.log('📧 VerifyEmailScreen unmounting');
+    };
   }, [token]);
 
   const verifyToken = async () => {
     if (!token) return;
 
+    console.log('🔄 Starting verification process...');
     dispatch(setLoading(true));
     setVerificationState('loading');
 
     try {
-      console.log('Verifying token:', token);
+      console.log('🔄 Calling API with token:', token);
       const authResponse = await apiService.verifyMagicLink(token);
 
-      console.log('Verification successful:', authResponse);
+      console.log('✅ API response received:', authResponse);
 
-      // Store auth data
+      // Reset onboarding state for new users
+      if (authResponse.is_new_user) {
+        console.log('🎉 New user detected - resetting onboarding state');
+        dispatch(resetOnboarding());
+      }
+
+      console.log('💾 Saving auth data to persistent storage...');
+      await apiService.saveAuthData(authResponse);
+      console.log('✅ Auth data saved to storage');
+
+      // Update Redux state - this will trigger RootNavigator to show Home screen
+      console.log('📝 Updating Redux auth state...');
       dispatch(
         setAuthSuccess({
           token: authResponse.token,
@@ -60,25 +81,31 @@ export const VerifyEmailScreen: React.FC<VerifyEmailScreenProps> = ({ route, nav
           isNewUser: authResponse.is_new_user,
         })
       );
+      console.log('✅ Redux state updated');
 
-      // Save to persistent storage
-      await apiService.saveAuthData(authResponse);
+      // Clear loading state
+      dispatch(setLoading(false));
 
+      // Update UI state
       setVerificationState('success');
+      
+      console.log('🏠 Verification complete - RootNavigator will automatically navigate to Home');
+      // DO NOT manually navigate - RootNavigator will handle it based on isAuthenticated state
 
-      // Navigation will be handled by App.tsx based on auth state
     } catch (err: any) {
-      console.error('Verification error:', err);
+      console.error('❌ Verification error:', err);
       const errorMsg =
         err.response?.data?.error || 'Failed to verify login link. Please try again.';
       
       setVerificationState('error');
       setErrorMessage(errorMsg);
       dispatch(setError(errorMsg));
+      dispatch(setLoading(false));
     }
   };
 
   const handleBackToLogin = () => {
+    console.log('🔙 Navigating back to login');
     navigation.navigate('EmailLogin');
   };
 
@@ -95,7 +122,8 @@ export const VerifyEmailScreen: React.FC<VerifyEmailScreenProps> = ({ route, nav
         <>
           <Text style={styles.successIcon}>✓</Text>
           <Text style={styles.successText}>Verification Successful!</Text>
-          <Text style={styles.subText}>Redirecting you to the app...</Text>
+          <Text style={styles.subText}>Loading your account...</Text>
+          <ActivityIndicator size="small" color="#4CAF50" style={{ marginTop: 16 }} />
         </>
       )}
 

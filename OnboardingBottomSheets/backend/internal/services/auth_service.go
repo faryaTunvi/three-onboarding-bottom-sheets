@@ -85,7 +85,9 @@ func (s *AuthService) GenerateMagicLink(email string) (string, error) {
 	s.mu.Unlock()
 
 	// Send email with magic link
-	magicLink := fmt.Sprintf("onboardingapp://auth/verify?token=%s", token)
+	// Use HTTP URL that redirects to deep link (works in email clients)
+	baseURL := getEnv("BASE_URL", "http://localhost:8080")
+	magicLink := fmt.Sprintf("%s/auth/verify?token=%s", baseURL, token)
 	if err := s.emailService.SendMagicLink(email, magicLink, token); err != nil {
 		// Log error but don't fail the request (token is still valid for testing)
 		fmt.Printf("Warning: Failed to send email to %s: %v\n", email, err)

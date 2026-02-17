@@ -12,7 +12,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { StatusBar, useColorScheme, Linking } from 'react-native';
+import { StatusBar, useColorScheme } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NavigationContainer } from '@react-navigation/native';
@@ -20,7 +20,7 @@ import { Provider as ReduxProvider } from 'react-redux';
 import { store } from './src/redux/store';
 import { RootNavigator } from './src/navigation';
 import { useAppDispatch } from './src/redux/hooks';
-import { restoreAuth, setAuthSuccess } from './src/redux/slices/authSlice';
+import { restoreAuth } from './src/redux/slices/authSlice';
 import apiService from './src/services/apiService';
 
 // Deep linking configuration
@@ -46,26 +46,6 @@ const AppContent: React.FC = () => {
   useEffect(() => {
     // Restore auth state on app start
     restoreAuthState();
-    
-    // Add universal deep link handler as fallback
-    const handleDeepLink = (event: { url: string }) => {
-      console.log('🔗 Deep link received:', event.url);
-    };
-
-    // Listen for deep link events
-    const subscription = Linking.addEventListener('url', handleDeepLink);
-
-    // Check if app was opened via deep link
-    Linking.getInitialURL().then((url) => {
-      if (url) {
-        console.log('🔗 Initial URL:', url);
-        handleDeepLink({ url });
-      }
-    });
-
-    return () => {
-      subscription.remove();
-    };
   }, [dispatch]);
 
   const restoreAuthState = async () => {
@@ -97,7 +77,19 @@ function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ReduxProvider store={store}>
         <SafeAreaProvider>
-          <NavigationContainer linking={linking}>
+          <NavigationContainer
+            linking={linking}
+            onReady={() => {
+              console.log('📱 Navigation ready');
+              console.log('🔍 Auth state:', store.getState().auth.isAuthenticated);
+            }}
+            onStateChange={(state) => {
+              console.log('📍 Navigation state changed:', JSON.stringify(state, null, 2));
+              const currentRoute = state?.routes[state.index];
+              console.log('📍 Current route:', currentRoute?.name, 'Params:', JSON.stringify(currentRoute?.params));
+              console.log('🔍 Auth state:', store.getState().auth.isAuthenticated);
+            }}
+          >
             <StatusBar
               barStyle={isDarkMode ? 'light-content' : 'dark-content'}
               backgroundColor={isDarkMode ? '#000000' : '#FFFFFF'}
