@@ -14,17 +14,18 @@ export type RootStackParamList = {
 const Stack = createStackNavigator<RootStackParamList>();
 
 export const RootNavigator: React.FC = () => {
-  const { isAuthenticated, userId, email } = useAppSelector((state) => state.auth);
+  const { isAuthenticated, userId, email, isLoading } = useAppSelector((state) => state.auth);
 
   // Log navigation state changes
   useEffect(() => {
-    console.log('🗺️ RootNavigator state changed:', {
+    console.log('🗺️ RootNavigator re-rendering with state:', {
       isAuthenticated,
       userId,
       email,
-      willShowHome: isAuthenticated
+      isLoading,
+      screenToShow: isAuthenticated ? 'HomeScreen' : 'Auth Screens'
     });
-  }, [isAuthenticated, userId, email]);
+  }, [isAuthenticated, userId, email, isLoading]);
 
   return (
     <Stack.Navigator
@@ -40,23 +41,33 @@ export const RootNavigator: React.FC = () => {
     >
       {!isAuthenticated ? (
         <>
+          {console.log('📱 Rendering Auth Stack: EmailLogin + VerifyEmail')}
           <Stack.Screen 
             name="EmailLogin" 
             component={EmailLoginScreen}
-            options={{ animationEnabled: false }}
+            options={{ 
+              animationEnabled: false,
+            }}
           />
           <Stack.Screen 
             name="VerifyEmail" 
             component={VerifyEmailScreen}
-            options={{ animationEnabled: false }}
+            options={{ 
+              animationEnabled: false,
+            }}
           />
         </>
       ) : (
-        <Stack.Screen 
-          name="Home" 
-          component={HomeScreen}
-          options={{ animationEnabled: true }}
-        />
+        <>
+          {console.log('📱 Rendering Authenticated Stack: Home')}
+          <Stack.Screen 
+            name="Home" 
+            component={HomeScreen}
+            options={{ 
+              animationEnabled: true,
+            }}
+          />
+        </>
       )}
     </Stack.Navigator>
   );

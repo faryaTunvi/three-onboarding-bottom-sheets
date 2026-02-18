@@ -33,7 +33,8 @@ export const HomeScreen: React.FC = () => {
 
   // Initialize screen
   useEffect(() => {
-    console.log('📱 HomeScreen mounted with state:', {
+    console.log('📱 HomeScreen mounted');
+    console.log('📱 Auth state:', {
       userId,
       email,
       isNewUser,
@@ -43,7 +44,7 @@ export const HomeScreen: React.FC = () => {
 
     // Delay to ensure Redux state is fully loaded and navigation is complete
     const initTimer = setTimeout(() => {
-      console.log('✅ HomeScreen initialized');
+      console.log('✅ HomeScreen initialized and ready');
       setIsInitialized(true);
     }, 500);
 
@@ -56,41 +57,40 @@ export const HomeScreen: React.FC = () => {
   // Auto open OnboardSheet for new users who haven't seen it
   useEffect(() => {
     if (!isInitialized) {
-      console.log('⏳ HomeScreen not yet initialized, waiting...');
+      console.log('⏳ Waiting for HomeScreen initialization...');
       return;
     }
 
+    console.log('🔍 Checking onboarding conditions:', {
+      userId: !!userId,
+      isNewUser,
+      hasCompletedOnboarding,
+      hasSeenWelcomeSheet,
+      shouldShowOnboarding: userId && isNewUser && !hasCompletedOnboarding && !hasSeenWelcomeSheet
+    });
+
     // Show onboarding only for authenticated users who are new and haven't completed onboarding
     if (userId && isNewUser && !hasCompletedOnboarding && !hasSeenWelcomeSheet) {
-      console.log('🎊 Opening OnboardSheet for new user:', {
-        userId,
-        isNewUser,
-        hasCompletedOnboarding,
-        hasSeenWelcomeSheet
-      });
+      console.log('🎊 Conditions met! Opening OnboardSheet for new user');
       
       // Additional delay to ensure refs are ready and screen is fully rendered
       const timer = setTimeout(() => {
-        console.log('📱 Triggering OnboardSheet open...');
-        welcomeSheetRef.current?.snapToIndex(0);
-      }, 1000);
+        console.log('📱 Executing OnboardSheet.snapToIndex(0)...');
+        try {
+          welcomeSheetRef.current?.snapToIndex(0);
+          console.log('✅ OnboardSheet opened successfully');
+        } catch (error) {
+          console.error('❌ Failed to open OnboardSheet:', error);
+        }
+      }, 1500);
 
       return () => clearTimeout(timer);
     } else {
-      console.log('ℹ️ OnboardSheet conditions not met:', {
-        userId: !!userId,
-        isNewUser,
-        hasCompletedOnboarding,
-        hasSeenWelcomeSheet,
-        reason: !userId 
-          ? 'No userId' 
-          : !isNewUser 
-          ? 'Not a new user' 
-          : hasCompletedOnboarding 
-          ? 'Already completed onboarding'
-          : hasSeenWelcomeSheet
-          ? 'Already seen welcome sheet'
-          : 'Unknown'
+      console.log('ℹ️ OnboardSheet will NOT open because:', {
+        noUserId: !userId,
+        notNewUser: !isNewUser,
+        alreadyCompletedOnboarding: hasCompletedOnboarding,
+        alreadySeenWelcomeSheet: hasSeenWelcomeSheet
       });
     }
   }, [userId, isNewUser, hasCompletedOnboarding, hasSeenWelcomeSheet, isInitialized]);

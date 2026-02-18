@@ -22,57 +22,60 @@ interface VerifyEmailScreenProps {
 
 export const VerifyEmailScreen: React.FC<VerifyEmailScreenProps> = ({ route, navigation }) => {
   const dispatch = useAppDispatch();
-  const { token } = route.params || {};
   const [verificationState, setVerificationState] = useState<'loading' | 'success' | 'error'>('loading');
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     console.log('📧 VerifyEmailScreen mounted');
-    console.log('📧 Route params:', route.params);
-    console.log('📧 Token:', token);
+    console.log('📧 Route params:', JSON.stringify(route.params, null, 2));
+    
+    const token = route.params?.token;
     
     if (token) {
-      console.log('✅ Token found, starting verification...');
-      verifyToken();
+      console.log('✅ Token found in route params:', token);
+      // Start verification immediately
+      verifyToken(token);
     } else {
-      console.log('❌ No token found in route params');
+      console.error('❌ No token found in route params');
       setVerificationState('error');
-      setErrorMessage('Invalid verification link - no token found');
+      setErrorMessage('Invalid verification link - no token provided');
       dispatch(setError('Invalid verification link'));
       dispatch(setLoading(false));
     }
 
-    // Cleanup on unmount
     return () => {
       console.log('📧 VerifyEmailScreen unmounting');
     };
-  }, [token]);
+  }, [route.params?.token]);
 
-  const verifyToken = async () => {
-    if (!token) return;
-
+  const verifyToken = async (tokenToVerify: string) => {
     console.log('🔄 Starting verification process...');
+    console.log('🔄 Token to verify:', tokenToVerify);
+    
     dispatch(setLoading(true));
     setVerificationState('loading');
 
     try {
-      console.log('🔄 Calling API with token:', token);
-      const authResponse = await apiService.verifyMagicLink(token);
+      console.log('🔄 Calling apiService.verifyMagicLink...');
+      const authResponse = await apiService.verifyMagicLink(tokenToVerify);
 
-      console.log('✅ API response received:', authResponse);
+      console.log('✅ API response received:', {
+        hasToken: !!authResponse.token,
+        userId: authResponse.user_id,
+        email: authResponse.email,
+        isNewUser: authResponse.is_new_user,
+      });
 
-      // Reset onboarding state for new users
-      if (authResponse.is_new_user) {
-        console.log('🎉 New user detected - resetting onboarding state');
-        dispatch(resetOnboarding());
-      }
+      // Reset onboarding state for ALL users
+      console.log('🔄 Resetting onboarding state...');
+      dispatch(resetOnboarding());
 
       console.log('💾 Saving auth data to persistent storage...');
       await apiService.saveAuthData(authResponse);
       console.log('✅ Auth data saved to storage');
 
-      // Update Redux state - this will trigger RootNavigator to show Home screen
-      console.log('📝 Updating Redux auth state...');
+      // Update Redux state
+      console.log('📝 Dispatching setAuthSuccess...');
       dispatch(
         setAuthSuccess({
           token: authResponse.token,
@@ -81,7 +84,9 @@ export const VerifyEmailScreen: React.FC<VerifyEmailScreenProps> = ({ route, nav
           isNewUser: authResponse.is_new_user,
         })
       );
-      console.log('✅ Redux state updated');
+      
+      console.log('✅ Redux auth state updated');
+      console.log('✅ isAuthenticated should now be true');
 
       // Clear loading state
       dispatch(setLoading(false));
@@ -89,13 +94,17 @@ export const VerifyEmailScreen: React.FC<VerifyEmailScreenProps> = ({ route, nav
       // Update UI state
       setVerificationState('success');
       
-      console.log('🏠 Verification complete - RootNavigator will automatically navigate to Home');
-      // DO NOT manually navigate - RootNavigator will handle it based on isAuthenticated state
+      console.log('🏠 Verification complete! RootNavigator should navigate to Home');
 
     } catch (err: any) {
       console.error('❌ Verification error:', err);
+      console.error('❌ Error response:', err.response?.data);
+      console.error('❌ Error message:', err.message);
+      
       const errorMsg =
-        err.response?.data?.error || 'Failed to verify login link. Please try again.';
+        err.response?.data?.error || 
+        err.message || 
+        'Failed to verify login link. Please try again.';
       
       setVerificationState('error');
       setErrorMessage(errorMsg);
@@ -106,6 +115,7 @@ export const VerifyEmailScreen: React.FC<VerifyEmailScreenProps> = ({ route, nav
 
   const handleBackToLogin = () => {
     console.log('🔙 Navigating back to login');
+    dispatch(setError(''));
     navigation.navigate('EmailLogin');
   };
 
@@ -115,6 +125,7 @@ export const VerifyEmailScreen: React.FC<VerifyEmailScreenProps> = ({ route, nav
         <>
           <ActivityIndicator size="large" color="#2A75CF" />
           <Text style={styles.text}>Verifying your login...</Text>
+          <Text style={styles.subText}>Please wait</Text>
         </>
       )}
 
@@ -157,6 +168,12 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     textAlign: 'center',
   },
+  subText: {
+    marginTop: 8,
+    fontSize: 14,
+    color: '#AAAAAA',
+    textAlign: 'center',
+  },
   successIcon: {
     fontSize: 64,
     color: '#4CAF50',
@@ -167,11 +184,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#FFFFFF',
     marginBottom: 8,
-    textAlign: 'center',
-  },
-  subText: {
-    fontSize: 16,
-    color: '#AAAAAA',
     textAlign: 'center',
   },
   errorIcon: {

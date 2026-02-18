@@ -1,12 +1,29 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 
 // Configure your API base URL here
-// For development: Use your computer's local IP address (not localhost)
-// Example: const API_BASE_URL = 'http://192.168.1.100:8080';
-const API_BASE_URL = __DEV__ 
-  ? 'http://localhost:8080'  // Change to your local IP for device testing
-  : 'https://your-production-api.com';
+// IMPORTANT: Update YOUR_LOCAL_IP with your computer's IP address
+// To find your IP:
+// - Mac: System Preferences > Network > Select your connection > IP Address
+// - Windows: ipconfig in cmd, look for IPv4 Address
+// - Linux: ifconfig or ip addr show
+const YOUR_LOCAL_IP = '192.168.1.100'; // 🔴 CHANGE THIS TO YOUR MACHINE'S IP
+
+const getBaseUrl = () => {
+  if (__DEV__) {
+    // Android emulator: use 10.0.2.2 to reach host machine
+    if (Platform.OS === 'android') {
+      return 'http://10.0.2.2:8080';
+    }
+    // iOS simulator: use localhost
+    // Physical devices: use your computer's IP
+    return 'http://localhost:8080';
+  }
+  return 'https://your-production-api.com';
+};
+
+const API_BASE_URL = getBaseUrl();
 
 const AUTH_TOKEN_KEY = '@auth_token';
 const USER_DATA_KEY = '@user_data';
@@ -37,11 +54,13 @@ class ApiService {
   constructor() {
     this.api = axios.create({
       baseURL: API_BASE_URL,
-      timeout: 10000,
+      timeout: 15000, // Increased timeout
       headers: {
         'Content-Type': 'application/json',
       },
     });
+
+    console.log('🌐 API Base URL:', API_BASE_URL);
 
     // Request interceptor
     this.api.interceptors.request.use(
@@ -54,25 +73,41 @@ class ApiService {
         if (this.authToken) {
           config.headers.Authorization = `Bearer ${this.authToken}`;
         }
+        
+        console.log('📤 API Request:', config.method?.toUpperCase(), config.url);
         return config;
       },
       (error) => {
+        console.error('❌ Request interceptor error:', error);
         return Promise.reject(error);
       }
     );
 
     // Response interceptor
     this.api.interceptors.response.use(
-      (response) => response,
+      (response) => {
+        console.log('✅ API Response:', response.config.url, response.status);
+        return response;
+      },
       async (error) => {
         // Handle 401 errors (unauthorized)
         if (error.response?.status === 401) {
           // Clear auth data
           await this.clearAuthData();
-          // Optionally trigger a logout action
         }
         
-        console.error('API Error:', error.response?.data || error.message);
+        // Enhanced error logging
+        if (error.code === 'ERR_NETWORK') {
+          console.error('🔴 Network Error - Cannot reach server at:', API_BASE_URL);
+          console.error('💡 Troubleshooting:');
+          console.error('  1. Check if backend server is running');
+          console.error('  2. Verify API_BASE_URL in apiService.ts');
+          console.error('  3. For physical device, use your computer\'s IP address');
+          console.error('  4. For Android emulator, use 10.0.2.2');
+        } else {
+          console.error('API Error:', error.response?.data || error.message);
+        }
+        
         return Promise.reject(error);
       }
     );
@@ -124,6 +159,11 @@ class ApiService {
     } catch (error) {
       console.error('Error clearing auth data:', error);
     }
+  }
+
+  // Get current API base URL (for debugging)
+  getApiBaseUrl(): string {
+    return API_BASE_URL;
   }
 
   // Authentication Endpoints

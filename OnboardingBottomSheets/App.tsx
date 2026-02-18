@@ -25,14 +25,17 @@ import apiService from './src/services/apiService';
 
 // Deep linking configuration
 const linking = {
-  prefixes: ['onboardingapp://'],
+  prefixes: ['onboardingapp://', 'http://localhost:8080', 'https://'],
   config: {
     screens: {
       EmailLogin: 'login',
       VerifyEmail: {
-        path: 'auth/verify',
+        path: 'auth/verify/:token',
         parse: {
-          token: (token: string) => token,
+          token: (token: string) => {
+            console.log('🔗 Deep link parsing token:', token);
+            return token;
+          },
         },
       },
       Home: 'home',
